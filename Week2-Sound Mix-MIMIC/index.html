@@ -1,0 +1,326 @@
+<html>
+
+<head>
+  <h1 style="color:red;font-size:30px;background-color:black">Week2: Sound(Mix)</h1>
+ <!-- this script holds a load of samples as raw data --> 
+ <script>window.onerror = function(error, url, line) {parent.postMessage(["console", "❌ -- [ERROR] -- ❌ -- ⚠️ " + error], "*")};var cl = console.log;console.log = function () {var msg = [...arguments].join();parent.postMessage(["console", msg], "*");  }  </script><script src = "https://mimicproject.com/libs/maximilian.js">
+</script>
+  <script src = "https://mimicproject.com/libs/nexusUI.js">
+</script>
+  
+  <link href="https://fonts.googleapis.com/css?family=Staatliches" rel="stylesheet"/>  
+
+  <script crossorigin src = "https://rawgit.com/nexus-js/ui/master/dist/NexusUI.js">
+</script>
+  <style type = "text/css" >
+#inner-container {
+  background-color: #8ED9FF;
+  width:800px;
+  padding:20px;
+  position:absolute;
+}
+
+#main-container {
+  background-color: #8ED9FF;
+  width:auto;
+  height:800px;
+}
+
+body {
+  font-family: 'Staatliches';
+  font-size: 30px;
+  color: black;
+  text-align: left;
+}
+
+#subtitle {
+  font-size: 70%;
+  
+}
+
+button {
+  background-color: transparent;
+  color:grey;
+  border:solid black 5px;
+  width:120px;
+  padding:10px;
+  margin:10px;
+  font-family: 'Staatliches';
+    font-size: 25px;
+}
+
+button:hover {
+  background-color: transparent;
+  color:#FFD12C;
+  border:solid #FFD12C 5px;
+}
+</style>
+
+    
+<div id="oscilloscope"></div>
+<div id="spectrogram"></div> 
+
+</head>
+
+<body>
+    <br>
+    <br>
+
+
+</body>
+
+ <!-- this script holds an object that can be used to make all sorts of synths --> 
+  
+<script language="javascript" type="text/javascript">
+  let maxi = maximilian();
+  let audio = new maxi.maxiAudio();
+  let myOsc = new maxi.maxiOsc();
+  let myOsc2 = new maxi.maxiOsc();
+  let hat = new maxi.maxiSample();
+  let kicks = new maxi.maxiSample();
+  let drums = new maxi.maxiSample();
+  let dists = new maxi.maxiSample();
+  let myClock = new maxi.maxiClock();
+  
+  
+  audio.init();
+  
+  audio.loadSample('k1.wav',hat);
+  audio.loadSample('mixki.wav',kicks);
+  audio.loadSample('drum.wav',drums);
+  audio.loadSample('k2.wav',dists);
+  
+  var tempo = 120
+  var ticks = 4
+  
+  myClock.setTempo(tempo);
+  myClock.setTicksPerBeat(ticks);
+
+  //mySample.trigger();
+  
+  audio.play = function(){
+    
+    myClock.ticker();
+    
+    
+    if(myClock.tick && myClock.playHead%8 == 4) {
+      
+      kicks.trigger();
+    }
+    
+    if(myClock.tick && Math.random() > 0.75 && myClock.playHead % 4 != 0) {
+      
+      hat.trigger();
+      drums.trigger();
+    }
+    
+     if( myClock.tick && Math.random()>0.25){
+           
+      dists.trigger();
+     }
+    
+    
+  //var hatOut = hat.playOnce() * 0.5;
+
+  //var kicksOut = kicks.playOnce();
+
+  //var drumsOut = drums.playOnce() * 0.2;
+  
+  //var distsOut = dists.play(myOsc.sinewave(6));
+    
+  //var out = 1.0 *(hatOut + kicksOut + drumsOut +distsOut) + myOsc.sinewave(20 + (myOsc2.sinewave(15))* myOsc2.sinewave(0.14583333333334) * 500);
+    
+    
+    var out = kicks.playOnce()*2 + hat.playOnce() + dists.playOnce()*0.2+ drums.play(0.6 + myOsc.sinewave(1)) + myOsc.sinewave(0.1);
+    
+    return out;
+  }
+</script>
+
+
+<script language="javascript" type="text/javascript">
+
+    var maxi = maximilian(); 
+  //create an audio engine
+	var maxiEngine = new maxi.maxiAudio();
+	
+	//create a bunch of stuff
+    var sample = new maxi.maxiSample();
+    var kick = new maxi.maxiSample();
+    var snare = new maxi.maxiSample();
+    var bear = new maxi.maxiSample();
+    var bass = new maxi.maxiSample();
+    var myOsc = new maxi.maxiOsc();
+    var myOsc2 = new maxi.maxiOsc();
+    var myClock = new maxi.maxiClock();
+  
+  	var scratch=0;
+    var counter = 0;
+    myClock.setTempo(2);
+    myClock.setTicksPerBeat(10);
+  	var oscilloscope,spectrogram;
+    
+
+   
+ 
+
+	  //start the audio engine
+	  maxiEngine.init();
+	  //the sample is from freesound https://freesound.org/people/schafferdavid/sounds/211471/
+  	maxiEngine.loadSample("drum.wav", sample);
+  	maxiEngine.loadSample("k2.wav", kick);
+  	maxiEngine.loadSample("gameover.wav", snare);
+    maxiEngine.loadSample("k1.wav", bear);
+    maxiEngine.loadSample("mixki.wav", bass);
+  
+    Nexus.context = maxiEngine.context;
+	oscilloscope = new Nexus.Oscilloscope('oscilloscope', {'size': [400,100]}).connect(maxiEngine.maxiAudioProcessor);
+    
+    spectrogram = new Nexus.Spectrogram('spectrogram', {'size': [400,100]}).connect(maxiEngine.maxiAudioProcessor);
+      
+     audio.play = function(){
+          
+      myClock.ticker();
+        
+        if (myClock.tick) {            
+            scratch=0;
+            counter++;
+        }
+        if (myClock.tick && counter% 16 == 4 && Math.random() > 0.8) {
+            kick.trigger();            
+        }
+        if (myClock.tick && counter% 16 == 10 && Math.random() < 0.2) {
+            kick.trigger();            
+        }
+        if (myClock.tick && counter% 16 == 0 && Math.random() > 0.8) {                
+            sample.trigger();
+            snare.trigger();            
+        }
+        if (myClock.tick && Math.random()> 0.7 && counter% 16 == 8) {
+            snare.trigger();            
+        }         
+        if (myClock.tick && Math.random()< 0.1) {
+            bass.trigger();            
+        }
+         var out = kick.playOnce(5) + snare.playOnce(1) + sample.play(1 + myOsc.sinebuf(6))+bass.playOnce(10);      	
+        return out * 0.8;
+		
+        }
+	
+    
+    
+
+</script>
+
+<!-- Our javascript code -->
+<script type="text/javascript">
+    var maximJs = maximilian();
+    var maxiSynth;
+
+    // These are the samples in samples.js
+    var kick;
+    var snare;
+    var hat;
+    
+    var snort = [142,120,80,160,100,142,200,140];
+
+    var playHead = 0;
+
+    var mySynth = new maxiSynth();
+    var myOsc = new maximJs.maxiOsc();
+    var myOsc2 = new maximJs.maxiOsc();
+    var myOsc3 = new maximJs.maxiOsc();
+    var mySlew = new maximJs.maxiFilter();
+    var maxiAudio = new maximJs.maxiAudio();
+
+    // Calculate a waveform for testing. You could write samples in here...
+    //var wave = new Array(512) ;
+    // for (var i=0;i<512;i++) {
+    //     wave[i]=Math.sin(i/512 * (Math.PI * 2));
+    // }
+    maxiAudio.outputIsArray(true, 2);
+
+    maxiAudio.init();
+    // change this.output to an array
+
+    var myClock = new maximJs.maxiClock();
+
+    var kick1 = new maximJs.maxiSample();
+    var snare1 = new maximJs.maxiSample();
+    var hat1 = new maximJs.maxiSample();
+
+    var kickGain = 0;
+
+
+    myClock.setTempo(120);
+    myClock.setTicksPerBeat(4);
+
+    // This line shows you to how take an array (called wave in this case) and stick it in your maxiSample object. We're getting this from samples.js
+    kick1.setSample(maximJs.maxiTools.getArrayAsVectorDbl(kick));
+
+    snare1.setSample(maximJs.maxiTools.getArrayAsVectorDbl(snare));
+
+    hat1.setSample(maximJs.maxiTools.getArrayAsVectorDbl(hat));
+
+    maxiAudio.play = function() {
+        // this is necessary as file loading may not complete in setup
+        if (kick1.isReady() && snare1.isReady()) {
+
+            myClock.ticker();
+
+            if (myClock.tick) {
+                playHead++;
+
+                if (Math.random() > 0.75 && playHead % 8 != 4) {
+
+                    if (playHead % 8 === 0 || playHead % 8 == 3) {
+                        kickGain = 1.0;
+                    } else {
+                        kickGain = 0.6;
+                    }
+                    kick1.trigger();
+
+                    mySynth.saw = true;
+                    mySynth.frequency = snort[playHead%4]/2;
+                    mySynth.adsr.setRelease(Math.random() * 1500);
+                    mySynth.cutoff = 400;
+                    mySynth.adsrFilterMod = Math.random() * 5000;
+                    mySynth.lfoFilterMod = Math.random() * 1000;
+                    mySynth.lfoFrequency = Math.random() * 400;
+                    mySynth.Q = 2;
+                    mySynth.gain = 0.75;
+                    mySynth.adsr.trigger = 1;
+
+                } else if (playHead % 8 == 4 || Math.random() > 0.5 && playHead % 8 == 7 || playHead % 32 > 29) {
+
+                    snare1.trigger();
+
+                }
+
+                if (playHead % 4 == 2) {
+
+                    hat1.trigger();
+
+                }
+
+            }
+
+            var kickOut = kick1.playOnce() * kickGain;
+
+            var snareOut = snare1.playOnce();
+
+            var hatOut = hat1.playOnce() * 0.2;
+
+            var mix = 1.0 * (kickOut + snareOut + hatOut + (mySynth.play())) + (myOsc.sinewave(50 + (myOsc2.sinewave(19) * (myOsc3.sinewave(0.14583333333334) * 500))) / 50);
+            mySynth.adsr.trigger = 0;
+
+            return mix;
+            //this.output[1] = this.output[0]; //just play the file. 
+
+
+        }
+    }
+</script>
+
+
+</html>

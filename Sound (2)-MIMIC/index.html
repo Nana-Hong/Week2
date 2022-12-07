@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html>
+<head>
+ <script>window.onerror = function(error, url, line) {parent.postMessage(["console", "❌ -- [ERROR] -- ❌ -- ⚠️ " + error], "*")};var cl = console.log;console.log = function () {var msg = [...arguments].join();parent.postMessage(["console", msg], "*");  }  </script><script src = "https://mimicproject.com/libs/maximilian.js">
+</script>
+ <link href="https://fonts.googleapis.com/css?family=Staatliches" rel="stylesheet">  
+ <script crossorigin src = "https://rawgit.com/nexus-js/ui/master/dist/NexusUI.js">
+</script>
+  <style type = "text/css" >
+#inner-container {
+  background-color: #8ED9FF;
+  width:800px;
+  padding:20px;
+  position:absolute;
+}
+
+#main-container {
+  background-color: #8ED9FF;
+  width:auto;
+  height:800px;
+}
+
+body {
+  font-family: 'Staatliches';
+  font-size: 30px;
+  color: black;
+  text-align: left;
+}
+
+#subtitle {
+  font-size: 70%;
+  
+}
+
+button {
+  background-color: transparent;
+  color:grey;
+  border:solid black 5px;
+  width:120px;
+  padding:10px;
+  margin:10px;
+  font-family: 'Staatliches';
+    font-size: 25px;
+}
+
+button:hover {
+  background-color: transparent;
+  color:#FFD12C;
+  border:solid #FFD12C 5px;
+}
+
+
+
+</style>
+</head>
+<body>
+  <div>
+    <div id="title">Week2: Sound(2)</div>
+    
+  <div><button id="playButton">Play</button></div>
+  <div><button id="stopButton" style="display:none">Stop</button></div>
+</div>
+<div id="oscilloscope"></div>
+<div id="spectrogram"></div>
+
+<script language="javascript" type="text/javascript">
+  
+  // We need to have a play button these days. Boring I know.
+	const playButton = document.getElementById('playButton');
+
+  //create a maximilian object
+  	var maxi = maximilian();
+
+  //create an audio engine
+	var maxiEngine = new maxi.maxiAudio();
+	
+	//create a bunch of stuff
+    var sample = new maxi.maxiSample();
+    var kick = new maxi.maxiSample();
+    var snare = new maxi.maxiSample();
+    var bear = new maxi.maxiSample();
+    var myOsc = new maxi.maxiOsc();
+    var myOsc2 = new maxi.maxiOsc();
+    var myClock = new maxi.maxiClock();
+  
+  	var scratch=0;
+    var counter = 0;
+    myClock.setTempo(2);
+    myClock.setTicksPerBeat(10);
+  	var oscilloscope,spectrogram;
+	
+	//when the play button is pressed...
+	let playAudio = () => {
+	  //arrange play button
+	  playButton.style.display="none";
+	  //start the audio engine
+	  maxiEngine.init();
+	  //the sample is from freesound https://freesound.org/people/schafferdavid/sounds/211471/
+  	maxiEngine.loadSample("mixki.wav", sample);
+  	maxiEngine.loadSample("k1.wav", kick);
+  	maxiEngine.loadSample("gameover.wav", snare);
+    maxiEngine.loadSample("beastroar.wav", bear);
+	  //show an oscilloscope and freqscope
+    Nexus.context = maxiEngine.context;
+	  oscilloscope = new Nexus.Oscilloscope('oscilloscope', {'size': [400,100]}).connect(maxiEngine.maxiAudioProcessor);
+    spectrogram = new Nexus.Spectrogram('spectrogram', {'size': [400,100]}).connect(maxiEngine.maxiAudioProcessor);
+
+		maxiEngine.play = function() {
+          
+      myClock.ticker();
+        
+        if (myClock.tick) {
+            
+            scratch=0;
+            counter++;
+        }
+
+        if (myClock.tick && counter%10===0) {
+            kick.trigger();            
+        }
+        if (myClock.tick && counter%16===2) {
+            kick.trigger();            
+        }
+
+
+        if (myClock.tick && counter%12==4) {
+                
+            sample.trigger();
+            snare.trigger();            
+        }
+
+        if (myClock.tick && counter%16==12) {
+            snare.trigger();            
+        }
+          
+        if (myClock.tick && counter%8==10) {
+            bear.trigger();            
+        }
+        
+       var out = kick.playOnce(5) + snare.playOnce(1) + sample.play(1 + myOsc.sinebuf(6))+bear.playOnce(10);      	
+        return out * 0.8;
+		
+        }
+	}
+
+    // This script listens to the play button
+	playButton.addEventListener("click", () => playAudio());
+
+
+	
+
+</script>
+</body>
+</html>
