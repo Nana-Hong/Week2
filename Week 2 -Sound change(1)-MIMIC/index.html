@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html>
+<head>
+ <script>window.onerror = function(error, url, line) {parent.postMessage(["console", "❌ -- [ERROR] -- ❌ -- ⚠️ " + error], "*")};var cl = console.log;console.log = function () {var msg = [...arguments].join();parent.postMessage(["console", msg], "*");  }  </script><script src = "https://mimicproject.com/libs/maximilian.v.0.1.js">    
+</script>
+ <script src = "https://mimicproject.com/libs/maximilian.js">
+</script>
+<script src = "https://mimicproject.com/libs/nexusUI.js">
+</script>
+  
+  <link href="https://fonts.googleapis.com/css?family=Staatliches" rel="stylesheet"/>  
+
+  <script crossorigin src = "https://rawgit.com/nexus-js/ui/master/dist/NexusUI.js">
+</script>
+  <style type = "text/css" >
+#inner-container {
+  background-color: #8ED9FF;
+  width:800px;
+  padding:20px;
+  position:absolute;
+}
+
+#main-container {
+  background-color: #8ED9FF;
+  width:auto;
+  height:800px;
+}
+
+body {
+  font-family: 'Staatliches';
+  font-size: 30px;
+  color: black;
+  text-align: left;
+}
+
+#subtitle {
+  font-size: 70%;
+  
+}
+
+button {
+  background-color: transparent;
+  color:grey;
+  border:solid black 5px;
+  width:120px;
+  padding:10px;
+  margin:10px;
+  font-family: 'Staatliches';
+    font-size: 25px;
+}
+
+button:hover {
+  background-color: transparent;
+  color:#FFD12C;
+  border:solid #FFD12C 5px;
+}
+</style>
+ <div>
+    <div id="title">Week 2: Sound</div>
+    
+    <div><button id="playButton">Play</button></div>
+    <div><button id="stopButton" style="display:none">Stop</button></div>
+</div>
+    
+<div id="oscilloscope"></div>
+<div id="spectrogram"></div>  
+   
+</head>
+<body>
+  <canvas></canvas>
+<script language="javascript" type="text/javascript">
+    
+  const playButton = document.getElementById('playButton');
+    var maxi = maximilian(); 
+  //create an audio engine
+	var maxiEngine = new maxi.maxiAudio();
+	
+	//create a bunch of stuff
+    var sample = new maxi.maxiSample();
+    var kick = new maxi.maxiSample();
+    var snare = new maxi.maxiSample();
+    var bear = new maxi.maxiSample();
+    var bass = new maxi.maxiSample();
+    var myOsc = new maxi.maxiOsc();
+    var myOsc2 = new maxi.maxiOsc();
+    var myClock = new maxi.maxiClock();
+  
+  	var scratch=0;
+    var counter = 0;
+    myClock.setTempo(2);
+    myClock.setTicksPerBeat(10);
+  	var oscilloscope,spectrogram;
+    
+
+   
+  let playAudio = () => {
+	  //arrange play button
+	  playButton.style.display="none";
+	  //start the audio engine
+	  maxiEngine.init();
+	  //the sample is from freesound https://freesound.org/people/schafferdavid/sounds/211471/
+  	maxiEngine.loadSample("drum.wav", sample);
+  	maxiEngine.loadSample("k2.wav", kick);
+  	maxiEngine.loadSample("gameover.wav", snare);
+    maxiEngine.loadSample("k1.wav", bear);
+    maxiEngine.loadSample("mixki.wav", bass);
+  
+    Nexus.context = maxiEngine.context;
+	oscilloscope = new Nexus.Oscilloscope('oscilloscope', {'size': [400,100]}).connect(maxiEngine.maxiAudioProcessor);
+    
+    spectrogram = new Nexus.Spectrogram('spectrogram', {'size': [400,100]}).connect(maxiEngine.maxiAudioProcessor);
+      
+      maxiEngine.play = function() {
+          
+      myClock.ticker();
+        
+        if (myClock.tick) {            
+            scratch=0;
+            counter++;
+        }
+        if (myClock.tick && counter% 16 == 4 && Math.random() > 0.8) {
+            kick.trigger();            
+        }
+        if (myClock.tick && counter% 16 == 10 && Math.random() < 0.2) {
+            kick.trigger();            
+        }
+        if (myClock.tick && counter% 16 == 0 && Math.random() > 0.8) {                
+            sample.trigger();
+            snare.trigger();            
+        }
+        if (myClock.tick && Math.random()> 0.7 && counter% 16 == 8) {
+            snare.trigger();            
+        }         
+        if (myClock.tick && Math.random()< 0.1) {
+            bass.trigger();            
+        }
+         var out = kick.playOnce(5) + snare.playOnce(1) + sample.play(1 + myOsc.sinebuf(6))+bass.playOnce(10);      	
+        return out * 0.8;
+		
+        }
+	
+    
+    
+    }
+
+  playButton.addEventListener("click", () => playAudio());
+</script>
+</body>
+</html>
